@@ -83,9 +83,25 @@ def deploy_labels(repo, apply):
                                   description=properties['description'])
 
 
+def deploy_settings(repo, apply):
+    update = False
+    if repo.has_issues != True:
+        print('  - CHANGE has_issues')
+        update = True
+    if repo.has_projects != False:
+        print('  - CHANGE has_projects')
+        update = True
+    if repo.has_wiki != False:
+        print('  - CHANGE has_wiki')
+        update = True
+    if update and apply:
+        repo.edit(has_issues=True, has_projects=False, has_wiki=False)
+
+
 def deploy_repo(repo, apply):
     print(repo.name + ':')
     deploy_labels(repo, apply)
+    deploy_settings(repo, apply)
 
 
 def deploy(config):
