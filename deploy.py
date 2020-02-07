@@ -13,10 +13,17 @@ Options:
   --apply           Apply the required changes.
 
 """
+import os
+import json
+from distutils.dir_util import copy_tree
+from subprocess import check_call, check_output
 from docopt import docopt
 from github import Github, Label
-import json
 
+
+ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
+FILES_DIR = os.path.join(ROOT_DIR, 'files')
+CACHE_DIR = os.path.join(ROOT_DIR, 'cache')
 
 LABELS = {
     'addition': {
@@ -98,10 +105,45 @@ def deploy_settings(repo, apply):
         repo.edit(has_issues=True, has_projects=False, has_wiki=False)
 
 
+def deploy_files(repo, apply):
+    branch_name = 'update-from-template'
+    commit_msg = 'Update from template'
+    pr_title = commit_msg
+    pr_body = '**Automatically created pull request to update some files to ' \
+              'their latest version from [librepcb-libraries-admin]' \
+              '(https://github.com/LibrePCB/librepcb-libraries-admin).**'
+    repo_dir = os.path.join(CACHE_DIR, repo.name)
+    if not os.path.isdir(repo_dir):
+        check_call(['git', 'clone', '-q', repo.ssh_url], cwd=CACHE_DIR)
+    else:
+        check_call(['git', 'reset', '-q', '--hard', 'master'], cwd=repo_dir)
+        check_call(['git', 'clean', '-q', '-f', '-d', '-x'], cwd=repo_dir)
+        check_call(['git', 'checkout', '-q', 'master'], cwd=repo_dir)
+        check_call(['git', 'pull', '-q'], cwd=repo_dir)
+    check_call(['git', 'checkout', '-q', '-B', branch_name], cwd=repo_dir)
+    copy_tree(FILES_DIR, repo_dir)
+    check_call(['git', 'add', '--all'], cwd=repo_dir)
+    changes = check_output(['git', 'status', '--porcelain'], cwd=repo_dir).\
+        decode('utf-8').strip()
+    if len(changes) > 0:
+        print('  ' + changes.replace('\n', '\n  '))
+        check_call(['git', 'commit', '-q', '-m', commit_msg], cwd=repo_dir)
+        if apply:
+            check_call(['git', 'push', '-q', '-f', 'origin', branch_name],
+                       cwd=repo_dir)
+    pr = repo.get_pulls(state='open', head='LibrePCB-Libraries:' + branch_name,
+                        base='master')
+    if (pr.totalCount == 0) and apply:
+        pr = repo.create_pull(title=pr_title, body=pr_body, head=branch_name,
+                              base='master')
+        pr.add_to_labels('ready for review')
+
+
 def deploy_repo(repo, apply):
     print(repo.name + ':')
     deploy_labels(repo, apply)
     deploy_settings(repo, apply)
+    deploy_files(repo, apply)
 
 
 def deploy(config):
