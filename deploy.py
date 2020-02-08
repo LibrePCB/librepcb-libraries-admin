@@ -4,13 +4,14 @@
 """Administrate LibrePCB Libraries
 
 Usage:
-  deploy.py [--token=<token>] [--apply]
+  deploy.py [--token=<token>] [--single] [--apply]
   deploy.py (-h | --help)
 
 Options:
   -h --help         Show this screen.
   --token=<token>   GitHub API token.
   --apply           Apply the required changes.
+  --single          Only deploy to LibrePCB_Base.lplib (for testing purposes).
 
 """
 import os
@@ -150,7 +151,8 @@ def deploy(config):
     gh = Github(config['--token'])
     org = gh.get_organization('LibrePCB-Libraries')
     for repo in org.get_repos():
-        deploy_repo(repo, config['--apply'])
+        if (repo.name == 'LibrePCB_Base.lplib') or not config['--single']:
+            deploy_repo(repo, config['--apply'])
 
 
 if __name__ == '__main__':

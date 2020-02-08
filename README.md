@@ -8,6 +8,24 @@
 
     pip install -r requirements.txt
 
-## Deploy
+## Create Configuration
 
-    python deploy.py [--apply]
+Create a file `options.json` with following content:
+
+```json
+{
+  "--token": "<GitHub API Token>"
+}
+```
+
+## Test Deployment
+
+    python deploy.py
+
+## Deploy To LibrePCB_Base.lplib
+
+    python deploy.py --single --apply
+
+## Deploy To All Libraries
+
+    python deploy.py --apply
