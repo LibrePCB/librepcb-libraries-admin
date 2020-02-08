@@ -20,12 +20,12 @@ Create a file `options.json` with following content:
 
 ## Test Deployment
 
-    python deploy.py
+    ./deploy.py
 
 ## Deploy To LibrePCB_Base.lplib
 
-    python deploy.py --single --apply
+    ./deploy.py --single --apply
 
 ## Deploy To All Libraries
 
-    python deploy.py --apply
+    ./deploy.py --apply
