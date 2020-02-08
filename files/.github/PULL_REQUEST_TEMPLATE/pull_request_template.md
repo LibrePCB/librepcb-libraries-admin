@@ -8,7 +8,7 @@ about:
 <!-- Describe the changes you have made. -->
 
 
-##### PENDING POINTS / UNRESOLVED ISSUES
+##### OPEN QUESTIONS / UNRESOLVED ISSUES
 <!-- List topics you are unsure about, if any. Otherwise, leave this empty. -->
 
 
