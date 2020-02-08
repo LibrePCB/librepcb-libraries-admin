@@ -110,9 +110,9 @@ def deploy_files(repo, apply):
     branch_name = 'update-from-template'
     commit_msg = 'Update from template'
     pr_title = commit_msg
-    pr_body = '**Automatically created pull request to update some files to ' \
+    pr_body = '*Automatically created pull request to update some files to ' \
               'their latest version from [librepcb-libraries-admin]' \
-              '(https://github.com/LibrePCB/librepcb-libraries-admin).**'
+              '(https://github.com/LibrePCB/librepcb-libraries-admin).*'
     repo_dir = os.path.join(CACHE_DIR, repo.name)
     if not os.path.isdir(repo_dir):
         check_call(['git', 'clone', '-q', repo.ssh_url], cwd=CACHE_DIR)
