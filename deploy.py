@@ -134,7 +134,7 @@ def deploy_files(repo, apply):
                        cwd=repo_dir)
     pr = repo.get_pulls(state='open', head='LibrePCB-Libraries:' + branch_name,
                         base='master')
-    if (pr.totalCount == 0):
+    if (len(changes) > 0) and (pr.totalCount == 0):
         print('  OPEN pull request')
         if apply:
             pr = repo.create_pull(title=pr_title, body=pr_body,
