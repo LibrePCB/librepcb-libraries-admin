@@ -19,8 +19,11 @@ is needed. -->
 
 - [ ] I have read and followed the library conventions¹.
 - [ ] For packages, I followed IPC7351C (see details in library conventions).
+- [ ] For modified elements, I bumped their version number².
 - [ ] I'm the copyright owner of the added content (i.e. the changes are made by myself, not copied/imported from somewhere else).
-- [ ] I agree to publish all my changes under the CC0 Public Domain License², allowing everyone to use and modify the content without any restrictions.
+- [ ] I agree to publish all my changes under the CC0 Public Domain License³, allowing everyone to use and modify the content without any restrictions.
 
 ¹ *Library Conventions: https://docs.librepcb.org/#libraryconventions*</br>
-² *CC0 Public Domain License: https://en.wikipedia.org/wiki/CC0*</br>
+² *Minor version bump if only metadata was modified (e.g. "0.1" -> "0.1.1"),
+  major version bump if functional changes were made (e.g. "0.1" -> "0.2")*</br>
+³ *CC0 Public Domain License: https://en.wikipedia.org/wiki/CC0*</br>
