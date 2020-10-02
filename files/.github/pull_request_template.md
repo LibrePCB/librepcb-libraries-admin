@@ -2,6 +2,11 @@
 <!-- Describe the changes you have made. -->
 
 
+##### DATASHEETS / REFERENCES
+<!-- When submitting a new device or package, please provide links to the
+necessary datasheets, package drawings or standards documents.-->
+
+
 ##### OPEN QUESTIONS / UNRESOLVED ISSUES
 <!-- List topics you are unsure about, if any. Otherwise, leave this empty. -->
 
