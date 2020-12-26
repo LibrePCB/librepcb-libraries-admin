@@ -20,6 +20,7 @@ is needed. -->
 - [ ] I have read and followed the library conventions¹.
 - [ ] For packages, I followed IPC7351C (see details in library conventions).
 - [ ] For modified elements, I bumped their version number².
+- [ ] I already used the new library elements in a design and verified their correctness (optional).
 - [ ] I'm the copyright owner of the added content (i.e. the changes are made by myself, not copied/imported from somewhere else).
 - [ ] I agree to publish all my changes under the CC0 Public Domain License³, allowing everyone to use and modify the content without any restrictions.
 
