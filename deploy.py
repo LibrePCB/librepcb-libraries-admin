@@ -51,6 +51,10 @@ LABELS = {
         'description': 'Pull request needs corrections before next review.',
         'color': 'c9adff',
     },
+    'blocked': {
+        'description': 'Blocked by other, dependent pull requests or issues.',
+        'color': '353535',
+    },
 }
 
 
