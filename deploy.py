@@ -108,8 +108,37 @@ def deploy_settings(repo, apply):
     if repo.has_wiki != False:
         print('  - CHANGE has_wiki')
         update = True
+    if repo.delete_branch_on_merge != True:
+        print('  - CHANGE delete_branch_on_merge')
+        update = True
+    if repo.default_branch != 'master':
+        print('  - CHANGE default_branch')
+        update = True
     if update and apply:
-        repo.edit(has_issues=True, has_projects=False, has_wiki=False)
+        repo.edit(
+            has_issues=True,
+            has_projects=False,
+            has_wiki=False,
+            delete_branch_on_merge=True,
+            default_branch='master',
+        )
+
+
+def deploy_branch_protection(repo, apply):
+    update = False
+    branch = repo.get_branch("master")
+    if branch.protected != True:
+        print('  - CHANGE protected')
+        update = True
+    if branch.protected:
+        protection = branch.get_protection()
+        if protection.enforce_admins != True:
+            print('  - CHANGE enforce_admins')
+            update = True
+    if update and apply:
+        branch.edit_protection(
+            enforce_admins=True,
+        )
 
 
 def deploy_files(repo, apply):
@@ -152,6 +181,7 @@ def deploy_repo(repo, apply):
     print(repo.name + ':')
     deploy_labels(repo, apply)
     deploy_settings(repo, apply)
+    deploy_branch_protection(repo, apply)
     deploy_files(repo, apply)
 
 
