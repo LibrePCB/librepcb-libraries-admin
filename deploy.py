@@ -4,16 +4,18 @@
 """Administrate LibrePCB Libraries
 
 Usage:
-  deploy.py [--token=<token>] [--apply] [<library>...]
+  deploy.py [--token=<token>] [--upgrade=<version>] [--apply] [<library>...]
   deploy.py (-h | --help)
 
 Options:
-  -h --help         Show this screen.
-  --token=<token>   GitHub API token.
-  --apply           Apply the required changes.
-  <library>         Name of the library repositories to deploy (e.g.
-                    "LibrePCB_Base.lplib"). If none is passed, all libraries
-                    are deployed.
+  -h --help             Show this screen.
+  --token=<token>       GitHub API token.
+  --upgrade=<version>   Upgrade the libraries to a new file format using the
+                        given tag for the librepcb/librepcb-cli Docker image.
+  --apply               Apply the required changes.
+  <library>             Name of the library repositories to deploy (e.g.
+                        "LibrePCB_Base.lplib"). If none is passed, all
+                        libraries are deployed.
 
 """
 import os
@@ -141,13 +143,7 @@ def deploy_branch_protection(repo, apply):
         )
 
 
-def deploy_files(repo, apply):
-    branch_name = 'update-from-template'
-    commit_msg = 'Update from template'
-    pr_title = commit_msg
-    pr_body = '*Automatically created pull request to update some files to ' \
-              'their latest version from [librepcb-libraries-admin]' \
-              '(https://github.com/LibrePCB/librepcb-libraries-admin).*'
+def checkout(repo, branch_name):
     repo_dir = os.path.join(CACHE_DIR, repo.name)
     if not os.path.isdir(repo_dir):
         check_call(['git', 'clone', '-q', repo.ssh_url], cwd=CACHE_DIR)
@@ -157,19 +153,45 @@ def deploy_files(repo, apply):
         check_call(['git', 'checkout', '-q', 'master'], cwd=repo_dir)
         check_call(['git', 'pull', '-q'], cwd=repo_dir)
     check_call(['git', 'checkout', '-q', '-B', branch_name], cwd=repo_dir)
-    copy_tree(FILES_DIR, repo_dir)
+    return repo_dir
+
+
+def commit_local_changes(repo_dir, message):
     check_call(['git', 'add', '--all'], cwd=repo_dir)
     changes = check_output(['git', 'status', '--porcelain'], cwd=repo_dir).\
         decode('utf-8').strip()
     if len(changes) > 0:
         print('  ' + changes.replace('\n', '\n  '))
-        check_call(['git', 'commit', '-q', '-m', commit_msg], cwd=repo_dir)
-        if apply:
-            check_call(['git', 'push', '-q', '-f', 'origin', branch_name],
-                       cwd=repo_dir)
+        check_call(['git', 'commit', '-q', '-m', message], cwd=repo_dir)
+    return len(changes)
+
+
+def upgrade_file_format(repo_dir, image_tag, commit_msg):
+    lib_name = os.path.basename(repo_dir)
+    check_call([
+        'docker', 'run', '-i', '-t', '--rm',
+        '-u', str(os.getuid()) + ':' + str(os.getgid()),
+        '-v', str(repo_dir) + ':/work/' + lib_name,
+        'librepcb/librepcb-cli:' + image_tag,
+        'open-library', '--all', '--save', '/work/' + lib_name
+    ])
+    return commit_local_changes(repo_dir, commit_msg)
+
+
+def update_files(repo_dir):
+    copy_tree(FILES_DIR, repo_dir)
+    return commit_local_changes(repo_dir, 'Update from template')
+
+def deploy_local_changes(repo, repo_dir, branch_name, pr_title, changes, apply):
+    pr_body = '*Automatically created pull request to update some files to ' \
+              'their latest version from [librepcb-libraries-admin]' \
+              '(https://github.com/LibrePCB/librepcb-libraries-admin).*'
+    if (changes > 0) and apply:
+        check_call(['git', 'push', '-q', '-f', 'origin', branch_name],
+                    cwd=repo_dir)
     pr = repo.get_pulls(state='open', head='LibrePCB-Libraries:' + branch_name,
                         base='master')
-    if (len(changes) > 0) and (pr.totalCount == 0):
+    if (changes > 0) and (pr.totalCount == 0):
         print('  OPEN pull request')
         if apply:
             pr = repo.create_pull(title=pr_title, body=pr_body,
@@ -177,21 +199,37 @@ def deploy_files(repo, apply):
             pr.add_to_labels('ready for review')
 
 
-def deploy_repo(repo, apply):
+def deploy_repo(repo, upgrade_version, branch_name, pr_title, apply):
     print(repo.name + ':')
     deploy_labels(repo, apply)
     deploy_settings(repo, apply)
     deploy_branch_protection(repo, apply)
-    deploy_files(repo, apply)
+
+    changes = 0
+    repo_dir = checkout(repo, branch_name)
+    if upgrade_version:
+        changes += upgrade_file_format(repo_dir, upgrade_version, pr_title)
+    changes += update_files(repo_dir)
+    deploy_local_changes(repo, repo_dir, branch_name, pr_title, changes, apply)
 
 
 def deploy(config):
     gh = Github(config['--token'])
     org = gh.get_organization('LibrePCB-Libraries')
+    upgrade_tag = config.get('--upgrade')
+    if upgrade_tag:
+        branch_name = 'upgrade-file-format'
+        pr_title = 'Upgrade to file format v{}'.format(
+            upgrade_tag.split('.')[0])
+    else:
+        branch_name = 'update-from-template'
+        pr_title = "Update from template"
+
     libraries = config['<library>']
     for repo in org.get_repos():
         if (repo.name in libraries) or (not libraries):
-            deploy_repo(repo, config['--apply'])
+            deploy_repo(repo, upgrade_tag, branch_name, pr_title,
+                        config['--apply'])
 
 
 if __name__ == '__main__':
