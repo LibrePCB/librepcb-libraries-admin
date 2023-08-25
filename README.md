@@ -22,9 +22,9 @@ Create a file `options.json` with following content:
 
     ./deploy.py
 
-## Deploy To LibrePCB_Base.lplib
+## Deploy Only To LibrePCB_Base.lplib
 
-    ./deploy.py --single --apply
+    ./deploy.py --apply LibrePCB_Base.lplib
 
 ## Deploy To All Libraries
 
