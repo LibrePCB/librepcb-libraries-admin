@@ -20,7 +20,7 @@ Options:
 """
 import os
 import json
-from distutils.dir_util import copy_tree
+from shutil import copytree
 from subprocess import check_call, check_output
 from docopt import docopt
 from github import Github, Label
@@ -179,7 +179,7 @@ def upgrade_file_format(repo_dir, image_tag, commit_msg):
 
 
 def update_files(repo_dir):
-    copy_tree(FILES_DIR, repo_dir)
+    copytree(FILES_DIR, repo_dir, dirs_exist_ok=True)
     return commit_local_changes(repo_dir, 'Update from template')
 
 def deploy_local_changes(repo, repo_dir, branch_name, pr_title, changes, apply):
