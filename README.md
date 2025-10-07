@@ -20,22 +20,22 @@ Create a file `options.json` with following content:
 
 ## Test Deployment
 
-    ./deploy.py
+    uv run deploy.py
 
 ## Deploy Only To LibrePCB_Base.lplib
 
-    ./deploy.py --apply LibrePCB_Base.lplib
+    uv run deploy.py --apply LibrePCB_Base.lplib
 
 ## Deploy To All Libraries
 
-    ./deploy.py --apply
+    uv run deploy.py --apply
 
 ## Upgrade Libraries File Format
 
 To upgrade libraries to a new file format, you need to have Docker installed.
 Then run the following command (combined with the flags documented above):
 
-    ./deploy.py --upgrade 1.0.0-rc1
+    uv run deploy.py --upgrade 1.0.0-rc1
 
 With `1.0.0-rc1` representing the tag of the `librepcb/librepcb-cli` Docker
 image to be used for the upgrade.
